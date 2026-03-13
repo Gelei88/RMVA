@@ -362,10 +362,11 @@ impl<'a> VmRange<'a> {
         Ok(slice)
     }
 
-    /// 分配一个 `T` 的单个实例。
+    /// 在竞技场中分配一个 `T` 的单个实例。
     ///
     /// # 安全
-    /// 返回的数据是未初始化的。调用者必须确保数据被正确初始化。c<T: Sized>(&mut self) -> Result<&'a mut T, ArenaError> {
+    /// 返回的数据是未初始化的。调用者必须确保数据被正确初始化。
+    pub(crate) unsafe fn alloc<T: Sized>(&mut self) -> Result<&'a mut T, ArenaError> {
         let size = core::mem::size_of::<T>();
         let alignment = core::mem::align_of::<T>();
         let slice = self.alloc_raw(size, alignment)?;
