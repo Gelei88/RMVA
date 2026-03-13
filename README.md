@@ -25,22 +25,22 @@
 ---
 
 ### Arena 路径（核心优化点）：
-1. Arena::new() → reserve_range()
-   → mmap(1GB, PROT_NONE, ANON)          ← 只 VMA + 顶级 page table
-   → 零物理内存！零 page fault！
+1. `Arena::new()` → `reserve_range()`
+   → `mmap(1GB, PROT_NONE, ANON)`          ← 只 VMA + 顶级 `page table`
+   → 零物理内存！零 `page fault！`
 
 2. alloc_array(1M u32) → bump pos
-   → 如果跨页：commit_memory()
+   → 如果跨页：`commit_memory()`
       → mprotect(当前页, PROT_RW)        ← 更新 VMA 权限
 
-3. *slice[i] = val（第一次写） → CPU page fault！
-   → 内核 do_pagefault() 
+3. `*slice[i] = val（第一次写） → CPU page fault！`
+   → 内核 `do_pagefault()`
       → 分配物理 RAM + 填 PTE 第4级
       → 更新 TLB 快表
    → 以后同一页全走 TLB（用户态）
 
-4. rewind() 
-   → pos = 0
-   → debug: mprotect(整个范围, PROT_NONE) ← 旧指针立刻 SIGSEGV
+4. `rewind()` 
+   → `pos = 0`
+   →` debug: mprotect(整个范围, PROT_NONE) ← 旧指针立刻 SIGSEGV`
 
 ---
